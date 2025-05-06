@@ -2,6 +2,25 @@ import pytest
 from unittest.mock import MagicMock
 from src.user_manager import UserManager, UserAlreadyExistsError
 
+
+class InMemoryUserRepository:
+
+    def __init__(self):
+        self.data = {}
+
+    def save_user(self,username,hashed_password):
+        if username in self.data:
+            raise UserAlreadyExistsError(f"'{username}' ya existe.")
+        self.data[username] = hashed_password
+
+    def get_user(self,username):
+        return self.data.get(username)
+    
+    def exists(self,username):
+        return username in self.data
+    
+  
+
 class FakeHashService:
 
     def hash(self,plain_text:str)->str:
@@ -53,3 +72,26 @@ def test_no_se_puede_agregar_usuario_existente_stub():
         stub_manager.add_user("cualquier", "1234")
 
     assert "ya existe" in str(exc.value)
+
+def test_inyectar_repositorio_inmemory():
+    repo=InMemoryUserRepository()
+    manager= UserManager(repo=repo)
+    username="fakeUser"
+    password="fakePass"
+
+    manager.add_user(username, password)
+    assert manager.user_exists(username)
+
+
+def test_envio_correo_bienvenida_al_agregar_usuario():
+    # Arrange
+    mock_email_service = MagicMock()
+    manager = UserManager(email_service=mock_email_service)
+    username = "nuevoUsuario"
+    password = "NuevaPass123!"
+
+    # Act
+    manager.add_user(username, password)
+
+    # Assert
+    mock_email_service.send_welcome_email.assert_called_once_with(username)

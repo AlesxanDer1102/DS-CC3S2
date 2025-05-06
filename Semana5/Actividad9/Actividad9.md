@@ -36,12 +36,29 @@ Con la Primera Iteracion Agregamos al usuario basico, y realizamos la ejecucion 
 
 Ahora en la siguiente iteracion agregamos la dependencia de hashing para encriptar y validad las contraseñas y este test pasa, y al usar la inyeccion de dependencias nos permite cambiar la logica de hashing sin modificar UserManager
 
-![alt text]({0305DBA7-852D-4DAE-814C-E9745289E3B7}.png)
+![alt text](images/{0305DBA7-852D-4DAE-814C-E9745289E3B7}.png)
 
 Continuamos con la iteracion ahora agregando El uso de un Mock para verificar las llamadas, aseguradonos de que cada ves que se llame ad_user, se invoque el método hash denuestro sevicio de hashing. Usando un mock que espia si se ha llamado el metodo y con que parametros se llamo.
 
 
 Pasando a la siguiente iteracion ahora reforzaremos un prueba para manejar usuarios repetidos usaremos stubs para aislar ciertos comportamientos. el uso de stub sera  apra forzar que user_exists devuelva True.
 
+Con esta implementacion podemos probar exitosamente que no se puede agregar un usuario que ya existe
 
+![alt text](images/{303B68B7-8F51-46E1-BFF8-1D83A987C793}.png)
+
+
+Ahora En la Iteracion 5 vamos a agregar un Fake repositorio de datos como inyeccion de dependncia, despues de agregar la funcionalidad de que acepte un repo para almacenar los datos de los usuarios y realizar las consultas, con esto usermanager ya no depende directamente de la estructura interna de almacenamiento.
+
+Despues de relizar los cambios corremos los test y estos pasan
+
+![alt text](images/{AFDA4734-0300-4B0A-A5EB-A8D12A09D872}.png)
+
+
+En la Iteracion 6 Ahora realizaremos un spy para notificaciones o envio de correos  en la cual cada vez que el usuario se agrega, se manda un correo de bienvenida para probar esto sin correos reales usaremos un Spy o Mock que verifique que se llamó al metodo de envio del correo.
+
+
+Ahora si corremos las pruebas estas deberian pasar sin problemas
+
+![alt text](images/{3289C67A-9A93-4A20-B0D3-4C1C7693D62F}.png)
 
