@@ -34,3 +34,14 @@ Con la Primera Iteracion Agregamos al usuario basico, y realizamos la ejecucion 
 
 ![alt text](images/{8D8C4B7C-7C73-47C8-A09B-362025A71462}.png)
 
+Ahora en la siguiente iteracion agregamos la dependencia de hashing para encriptar y validad las contraseñas y este test pasa, y al usar la inyeccion de dependencias nos permite cambiar la logica de hashing sin modificar UserManager
+
+![alt text]({0305DBA7-852D-4DAE-814C-E9745289E3B7}.png)
+
+Continuamos con la iteracion ahora agregando El uso de un Mock para verificar las llamadas, aseguradonos de que cada ves que se llame ad_user, se invoque el método hash denuestro sevicio de hashing. Usando un mock que espia si se ha llamado el metodo y con que parametros se llamo.
+
+
+Pasando a la siguiente iteracion ahora reforzaremos un prueba para manejar usuarios repetidos usaremos stubs para aislar ciertos comportamientos. el uso de stub sera  apra forzar que user_exists devuelva True.
+
+
+
