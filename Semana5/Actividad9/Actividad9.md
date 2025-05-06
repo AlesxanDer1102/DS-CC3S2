@@ -30,4 +30,7 @@ La iteracion del RGR  se basa en el anterior, con eso nos permite poder construi
 
 Desarrollar las 6 iteraciones de Desarrollo Guiado por Pruebas(TDD) RGR aplicados a UserManager
 
-Con la Primera Iteracion Agregamos al usuario basico
+Con la Primera Iteracion Agregamos al usuario basico, y realizamos la ejecucion de pytest y la prueba pasa
+
+![alt text](images/{8D8C4B7C-7C73-47C8-A09B-362025A71462}.png)
+
