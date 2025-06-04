@@ -1,18 +1,47 @@
 import json
 import sys
 import os
+import datetime
+import re
+
+def validate_connection_string(conn_str):
+    """Valida formato básico de connection string"""
+    # Patrón básico: protocol://user:password@host/database
+    pattern = r'^[a-zA-Z]+://[^:]+:[^@]+@[^/]+/.+$'
+    return bool(re.match(pattern, conn_str))
 
 # Función para simular validaciones complejas
 def perform_complex_validations(config_data, file_path):
     errors = []
     warnings = []
-    # Simular 20 líneas de validaciones
+    
+    # Obtener el nombre de la aplicación
+    app_name = config_data.get("applicationName", "")
+    
+    # Validaciones básicas existentes
     if not isinstance(config_data.get("applicationName"), str):
         errors.append(f"[{file_path}] 'applicationName' debe ser un string.")
     if not isinstance(config_data.get("listenPort"), int):
         errors.append(f"[{file_path}] 'listenPort' debe ser un entero.")
     elif not (1024 < config_data.get("listenPort", 0) < 65535):
         warnings.append(f"[{file_path}] 'listenPort' {config_data.get('listenPort')} está fuera del rango común.")
+
+    # NUEVA VALIDACIÓN: Específica para database_connector
+    if app_name == "database_connector":
+        if "connection_string" not in config_data:
+            errors.append(f"[{file_path}] 'connection_string' es requerido para database_connector.")
+        else:
+            conn_str = config_data.get("connection_string", "")
+            if not conn_str:
+                errors.append(f"[{file_path}] 'connection_string' no puede estar vacío para database_connector.")
+            elif not validate_connection_string(conn_str):
+                errors.append(f"[{file_path}] 'connection_string' tiene formato inválido. Esperado: protocol://user:password@host/database")
+            else:
+                # Si el connection_string es válido, podemos hacer validaciones adicionales
+                if "postgresql://" in conn_str and config_data.get("listenPort") != 5432:
+                    warnings.append(f"[{file_path}] PostgreSQL normalmente usa puerto 5432, pero está configurado en {config_data.get('listenPort')}.")
+                elif "mysql://" in conn_str and config_data.get("listenPort") != 3306:
+                    warnings.append(f"[{file_path}] MySQL normalmente usa puerto 3306, pero está configurado en {config_data.get('listenPort')}.")
 
     # Más validaciones simuladas
     for i in range(10):
@@ -25,6 +54,15 @@ def perform_complex_validations(config_data, file_path):
     for i in range(15):
         if config_data.get("settings",{}).get(f"s{i+1}") == None:
              errors.append(f"[{file_path}] Falta el setting s{i+1}")
+    
+    # Validaciones adicionales para database_connector
+    if app_name == "database_connector":
+        # Verificar settings específicos de base de datos
+        db_settings = config_data.get("settings", {})
+        if db_settings.get("maxConnections", 0) > 1000:
+            warnings.append(f"[{file_path}] maxConnections muy alto para database_connector: {db_settings.get('maxConnections')}")
+        if db_settings.get("logLevel") != "INFO":
+            warnings.append(f"[{file_path}] Se recomienda logLevel='INFO' para database_connector")
 
     return errors, warnings
 
@@ -37,6 +75,7 @@ def main():
     all_errors = []
     all_warnings = []
     files_processed = 0
+    db_connectors_found = 0
 
     # Simulación de lógica de recorrido y validación 
     for root, _, files in os.walk(config_dir_path):
@@ -46,6 +85,11 @@ def main():
                 try:
                     with open(file_path, 'r') as f:
                         data = json.load(f)
+                    
+                    # Contar database_connectors encontrados
+                    if data.get("applicationName") == "database_connector":
+                        db_connectors_found += 1
+                    
                     errors, warnings = perform_complex_validations(data, file_path)
                     all_errors.extend(errors)
                     all_warnings.extend(warnings)
@@ -57,18 +101,22 @@ def main():
 
     # Simulación de más líneas de código de reporte 
     report_summary = [f"Archivo de resumen de validación generado el {datetime.datetime.now()}"]
-    for i in range(19):
+    report_summary.append(f"Total de servicios database_connector encontrados: {db_connectors_found}")
+    
+    for i in range(18):
         report_summary.append(f"Línea de sumario {i}")
 
+    # Añadir información específica sobre validación de database_connector
+    if db_connectors_found > 0:
+        report_summary.append(f"Se validaron {db_connectors_found} configuraciones de database_connector con validaciones especiales de connection_string")
 
     print(json.dumps({
         "validation_summary": f"Validados {files_processed} archivos de configuración.",
         "errors_found": all_errors,
         "warnings_found": all_warnings,
-        "detailed_report_lines": report_summary # Más líneas
+        "detailed_report_lines": report_summary, # Más líneas
+        "database_connectors_validated": db_connectors_found
     }))
 
 if __name__ == "__main__":
-    # Añadir import datetime si no está
-    import datetime
     main()

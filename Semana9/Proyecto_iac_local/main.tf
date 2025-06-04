@@ -21,10 +21,33 @@ variable "python_executable" {
   default     = "python3"
 }
 
+variable "connection_string" {
+  description = "Connection string for database services"
+  type        = string
+  default     = ""
+}
+
+data "external" "global_deployment_metadata" {
+  program = [var.python_executable, "./scripts/python/generate_global_metadata.py"]
+  
+  # Query vacío porque no necesitamos pasar parámetros
+  query = {}
+}
+
+# Variables locales para acceder fácilmente a los metadatos globales
 locals {
+  deployment_id = data.external.global_deployment_metadata.result.deployment_id
+  deployment_timestamp = data.external.global_deployment_metadata.result.deployment_timestamp
+  deployment_metadata = jsondecode(data.external.global_deployment_metadata.result.full_metadata_json)
+
   common_app_config = {
     app1 = { version = "1.0.2", port = 8081 }
     app2 = { version = "0.5.0", port = 8082 }
+    database_connector ={
+      version ="1.0.0",
+      port = 5432,
+      connection_string = "postgresql://user:password@localhost/mydb"
+    }
     # Se pueden añadir más líneas fácilmente
     # app3 = { version = "2.1.0", port = 8083 }
     # app4 = { version = "1.0.0", port = 8084 }
@@ -41,6 +64,9 @@ module "simulated_apps" {
   base_install_path        = "${path.cwd}/generated_environment/services"
   global_message_from_root = var.mensaje_global # Pasar la variable sensible
   python_exe               = var.python_executable
+  connection_string        = lookup(each.value, "connection_string", "")
+  deployment_id            = local.deployment_id 
+  deployment_metadata      = local.deployment_metadata  
 }
 
 output "detalles_apps_simuladas" {
@@ -83,4 +109,13 @@ resource "null_resource" "check_all_healths" {
     command = "for service_dir in ${path.cwd}/generated_environment/services/*/; do bash ${path.cwd}/scripts/bash/check_simulated_health.sh \"$service_dir\"; done"
     interpreter = ["bash", "-c"]
   }
+}
+
+output "deployment_metadata" {
+  value = {
+    deployment_id = local.deployment_id
+    deployment_timestamp = local.deployment_timestamp
+    full_metadata = local.deployment_metadata
+  }
+  description = "Metadatos globales del despliegue"
 }

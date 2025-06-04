@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import sys
 import datetime
@@ -38,24 +39,35 @@ def main():
 
     app_name = input_json.get("app_name", "unknown_app")
     app_version = input_json.get("version", "0.0.0")
-    # input_data = input_json.get("input_data", "") # Usar si es necesario
-
+    deployment_id = input_json.get("deployment_id", "no-deployment-id")  # NUEVO
+    
     # Lógica de generación de metadatos 
     metadata = {
         "appName": app_name,
         "appVersion": app_version,
+        "deploymentId": deployment_id,  # NUEVO - ID global del despliegue
         "generationTimestamp": datetime.datetime.utcnow().isoformat(),
         "generator": "Python IaC Script",
-        "uniqueId": str(uuid.uuid4()),
+        "uniqueId": str(uuid.uuid4()),  # Este sigue siendo único por servicio
+        "instanceId": f"{deployment_id}-{app_name}-{uuid.uuid4().hex[:8]}",  # NUEVO - combina deployment_id con info del servicio
         "parametersReceived": input_json,
         "simulatedComplexity": complex_logic_simulation(app_name, app_version),
         "additional_info": [f"Linea info {k}" for k in range(10)], # 10 líneas
-        "status_flags": {f"flag_{l}": (l % 2 == 0) for l in range(10)} # 10 líneas
+        "status_flags": {f"flag_{l}": (l % 2 == 0) for l in range(10)}, # 10 líneas
+        "deployment_context": {  # NUEVO - contexto del despliegue
+            "deployment_id": deployment_id,
+            "service_registration": f"{deployment_id}/{app_name}/{app_version}",
+            "deployment_aware": True
+        }
     }
+    
     # Simulación de más lógica de negocio 
     metadata["processing_log"] = []
     for i in range(30):
         metadata["processing_log"].append(f"Entrada log  {i}: Item procesado {uuid.uuid4()}")
+    
+    # Añadir trazabilidad del despliegue
+    metadata["processing_log"].append(f"Servicio registrado en despliegue: {deployment_id}")
 
     # El script DEBE imprimir un JSON válido a stdout para 'data "external"'
     print(json.dumps({"metadata_json_string": json.dumps(metadata, indent=2)}))

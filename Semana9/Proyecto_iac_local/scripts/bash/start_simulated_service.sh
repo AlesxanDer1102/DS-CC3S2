@@ -28,6 +28,42 @@ done
 
 # Crear un archivo PID simulado
 echo $$ > "$PID_FILE"  # $$ es el PID del script actual
+
+# RETO ADICIONAL: Crear .db_lock si es database_connector
+if [ "$APP_NAME" == "database_connector" ]; then
+    DB_LOCK_FILE="$INSTALL_PATH/.db_lock"
+    
+    # Crear el archivo .db_lock con información relevante
+    echo "Database locked at: $(date)" > "$DB_LOCK_FILE"
+    echo "Locked by PID: $$" >> "$DB_LOCK_FILE"
+    echo "Service: $APP_NAME" >> "$DB_LOCK_FILE"
+    
+    # Extraer y registrar la connection_string del archivo de configuración
+    CONNECTION_STRING=$(python3 -c "
+import json
+with open('$CONFIG_FILE', 'r') as f:
+    config = json.load(f)
+    print(config.get('connection_string', 'NOT_FOUND'))
+" 2>/dev/null)
+    
+    if [ "$CONNECTION_STRING" != "NOT_FOUND" ]; then
+        echo "Connection: $CONNECTION_STRING" >> "$DB_LOCK_FILE"
+        echo "Database connection string encontrado y registrado" >> "$LOG_FILE"
+    else
+        echo "WARNING: No se encontró connection_string en la configuración" >> "$LOG_FILE"
+    fi
+    
+    # Registrar información adicional en el log
+    echo "=== DATABASE CONNECTOR STARTUP ===" >> "$LOG_FILE"
+    echo "Archivo de bloqueo creado: $DB_LOCK_FILE" >> "$LOG_FILE"
+    echo "Connection string: $CONNECTION_STRING" >> "$LOG_FILE"
+    echo "Lock timestamp: $(date)" >> "$LOG_FILE"
+    echo "=================================" >> "$LOG_FILE"
+    
+    # Mensaje en consola
+    echo "INFO: Archivo .db_lock creado para $APP_NAME en $DB_LOCK_FILE"
+fi
+
 echo "Servicio $APP_NAME 'iniciado'. PID guardado en $PID_FILE" >> "$LOG_FILE"
 echo "Servicio $APP_NAME 'iniciado'. PID: $(cat "$PID_FILE")"
 echo "--- Fin inicio servicio $APP_NAME ---"

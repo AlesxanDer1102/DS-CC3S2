@@ -1,17 +1,12 @@
 {
-    "applicationName": "${app_name_tpl}",
-    "version": "${app_version_tpl}",
-    "listenPort": ${port_tpl},
-    "deploymentTime": "${deployed_at_tpl}",
-    "notes": "Este es un archivo de configuración autogenerado. ${message_tpl}",
-    %{ if connection_string_tpl != "" }
-    "connection_string": "${connection_string_tpl}",
-    %{ endif }
-    "deployment": {
-        "id": "${deployment_id_tpl}",
-        "environment": "${deployment_env_tpl}",
-        "cluster": "${deployment_cluster_tpl}"
-    },
+    "applicationName": "database_connector",
+    "version": "1.0.0",
+    "listenPort": 5432,
+    "deploymentTime": "2025-06-04T02:53:18Z",
+    "notes": "Este es un archivo de configuración autogenerado. Configuración gestionada por Terraform.",
+    
+    "connection_string": "postgresql://user:password@localhost/mydb",
+    
     "settings": {
         "featureA": true,
         "featureB": false,

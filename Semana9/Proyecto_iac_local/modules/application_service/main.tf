@@ -4,6 +4,20 @@ variable "app_port"                 { type = number }
 variable "base_install_path"        { type = string }
 variable "global_message_from_root" { type = string }
 variable "python_exe"               { type = string }
+variable "connection_string"        { 
+  type = string
+  default = "" 
+  }
+variable "deployment_id" {
+  description = "ID único del despliegue global"
+  type        = string
+}
+
+variable "deployment_metadata" {
+  description = "Metadatos completos del despliegue global"
+  type        = any
+  default     = {}
+}
 
 locals {
   install_path = "${var.base_install_path}/${var.app_name}_v${var.app_version}"
@@ -26,6 +40,10 @@ data "template_file" "app_config" {
     port_tpl        = var.app_port
     deployed_at_tpl = timestamp()
     message_tpl     = var.global_message_from_root
+    connection_string_tpl = var.connection_string
+    deployment_id_tpl     = var.deployment_id  # NUEVO
+    deployment_env_tpl    = lookup(var.deployment_metadata, "environment", {}).deployment_type  # NUEVO
+    deployment_cluster_tpl = lookup(var.deployment_metadata, "global_settings", {}).cluster_name
   }
 }
 
@@ -43,6 +61,7 @@ data "external" "app_metadata_py" {
       app_name   = var.app_name
       version    = var.app_version
       input_data = "datos_adicionales_para_python"
+      deployment_id = var.deployment_id
     },
     {
       q1  = "v1",  q2  = "v2",  q3  = "v3",  q4  = "v4",  q5  = "v5",
