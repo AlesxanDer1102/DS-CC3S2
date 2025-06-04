@@ -2,9 +2,14 @@
     "applicationName": "app2",
     "version": "0.5.0",
     "listenPort": 8082,
-    "deploymentTime": "2025-06-04T02:53:18Z",
+    "deploymentTime": "2025-06-04T03:54:51Z",
     "notes": "Este es un archivo de configuración autogenerado. Configuración gestionada por Terraform.",
     
+    "deployment": {
+        "id": "c2d89bc3-4e75-49e7-bda2-dc7a6c1d5783",
+        "environment": "terraform_local",
+        "cluster": "cluster-3ef2bdd0"
+    },
     "settings": {
         "featureA": true,
         "featureB": false,

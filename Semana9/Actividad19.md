@@ -33,3 +33,5 @@ Este ejercicio demuestra la ecolucion en IaC al añadir un servicio con requisit
     - Pasa el deployment_id resultante como una variable de entrada al módulo application_service.
     - Modifica generate_app_metadata.py y/o config.json.tpl dentro del módulo application_service para que incorpore este deployment_id global.
     - Discusión: ¿Cómo mejora esto la composabilidad y reduce la redundancia? ¿Cómo afecta la idempotencia?
+
+![alt text](images/{86226435-B0BD-4FC3-9203-7B76C5A44CF5}.png)
